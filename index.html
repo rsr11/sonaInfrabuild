@@ -66,20 +66,21 @@
         nav {
             position: fixed;
             top: 0; left: 0; right: 0;
-            z-index: 100;
+            z-index: 200;
             padding: 28px 48px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            mix-blend-mode: normal;
         }
 
         .nav-logo {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(18px, 2.5vw, 24px);
+            font-size: clamp(16px, 2.5vw, 24px);
             letter-spacing: 0.25em;
             color: white;
             opacity: 0;
+            z-index: 210;
+            position: relative;
         }
 
         .nav-links {
@@ -100,6 +101,69 @@
         }
 
         .nav-links a:hover { color: var(--gold); }
+
+        /* HAMBURGER BUTTON */
+        .nav-burger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            z-index: 210;
+            position: relative;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+
+        .nav-burger span {
+            display: block;
+            width: 100%;
+            height: 1px;
+            background: white;
+            transition: transform 0.35s ease, opacity 0.25s ease, width 0.3s ease;
+            transform-origin: center;
+        }
+
+        .nav-burger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+        .nav-burger.open span:nth-child(2) { opacity: 0; width: 0; }
+        .nav-burger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+        /* MOBILE FULLSCREEN MENU */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(8,8,8,0.97);
+            z-index: 190;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            clip-path: inset(0 0 100% 0);
+            transition: clip-path 0.55s cubic-bezier(0.77,0,0.175,1);
+        }
+
+        .mobile-menu.open {
+            clip-path: inset(0 0 0% 0);
+        }
+
+        .mobile-menu a {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 12vw, 72px);
+            letter-spacing: 0.12em;
+            color: rgba(245,240,232,0.85);
+            text-decoration: none;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            width: 80%;
+            text-align: center;
+            transition: color 0.25s;
+        }
+
+        .mobile-menu a:hover { color: var(--gold); }
 
         /* HERO */
         #hero {
@@ -318,10 +382,74 @@
             align-items: start;
         }
 
+
+        /* ── MOBILE ── */
         @media (max-width: 768px) {
+            /* Nav */
+            nav { padding: 20px 20px; }
+            .nav-links { display: none !important; }
+            .nav-burger { display: flex; opacity: 1 !important; }
+            .mobile-menu { display: flex; }
+
+            /* Hero: keep full-screen, fix text spacing */
+            #hero { height: 100svh; }
+
+            .hero-content {
+                padding: 80px 20px 140px;
+                justify-content: space-between;
+            }
+
+            .hero-headline {
+                font-size: clamp(64px, 20vw, 100px);
+                line-height: 0.88;
+            }
+
+            /* Bottom row: stack tagline above counter, no overlap with preview box */
+            .hero-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding-right: clamp(160px, 38vw, 220px); /* keep clear of preview box */
+            }
+
+            .hero-tagline {
+                font-size: 9px;
+                letter-spacing: 0.15em;
+                max-width: 100%;
+                line-height: 1.9;
+            }
+
+            .slide-counter {
+                font-size: 28px;
+            }
+
+            /* Preview box: smaller on mobile, clear of text */
+            #hero-preview {
+                width: clamp(120px, 36vw, 180px);
+                height: clamp(90px, 22vh, 150px);
+            }
+
+            /* Scroll cue: push left so it doesn't clash with preview */
+            .scroll-cue {
+                left: 36px;
+                transform: none;
+            }
+
+            /* About */
             .about-grid { grid-template-columns: 1fr; }
-            nav { padding: 20px 24px; }
-            .nav-links { display: none; }
+            .about-image-accent { display: none; }
+
+            /* Projects */
+            .project-card:nth-child(n) { grid-column: span 12; }
+            .featured-project { grid-template-columns: 1fr; }
+
+            /* Footer */
+            .footer-top { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-headline { font-size: clamp(56px, 22vw, 80px); }
+            .hero-bottom { padding-right: clamp(130px, 40vw, 180px); }
         }
 
         .about-image-wrap {
@@ -761,7 +889,18 @@
         <li><a href="#">Achievements</a></li>
         <li><a href="#">Contact</a></li>
     </ul>
+    <button class="nav-burger" id="nav-burger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+    </button>
 </nav>
+
+<!-- MOBILE FULLSCREEN MENU -->
+<div class="mobile-menu" id="mobile-menu">
+    <a href="#about"    onclick="closeMobileMenu()">About</a>
+    <a href="#projects" onclick="closeMobileMenu()">Projects</a>
+    <a href="#"         onclick="closeMobileMenu()">Achievements</a>
+    <a href="#"         onclick="closeMobileMenu()">Contact</a>
+</div>
 
 <!-- HERO -->
 <section id="hero">
@@ -1180,22 +1319,59 @@ gsap.from('.featured-project', {
 ScrollTrigger.create({
     start: '80px top',
     onEnter: () => {
+        const isMobile = window.innerWidth <= 768;
         gsap.to('#main-nav', {
-            background: 'rgba(10,10,10,0.85)',
+            background: 'rgba(10,10,10,0.9)',
             backdropFilter: 'blur(16px)',
-            padding: '16px 48px',
+            padding: isMobile ? '14px 20px' : '16px 48px',
             duration: 0.4
         });
     },
     onLeaveBack: () => {
+        const isMobile = window.innerWidth <= 768;
         gsap.to('#main-nav', {
             background: 'transparent',
             backdropFilter: 'blur(0px)',
-            padding: '28px 48px',
+            padding: isMobile ? '20px 20px' : '28px 48px',
             duration: 0.4
         });
     }
 });
+
+// ─── HAMBURGER MENU ────────────────────────────────────────────────────────────
+const burger     = document.getElementById('nav-burger');
+const mobileMenu = document.getElementById('mobile-menu');
+let menuOpen = false;
+
+function openMobileMenu() {
+    menuOpen = true;
+    burger.classList.add('open');
+    mobileMenu.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu() {
+    menuOpen = false;
+    burger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+burger.addEventListener('click', () => {
+    menuOpen ? closeMobileMenu() : openMobileMenu();
+});
+
+// stagger menu links in on open
+const menuLinks = mobileMenu.querySelectorAll('a');
+const observer = new MutationObserver(() => {
+    if (mobileMenu.classList.contains('open')) {
+        gsap.fromTo(menuLinks,
+            { y: 32, opacity: 0 },
+            { y: 0, opacity: 1, stagger: 0.08, duration: 0.5, delay: 0.2, ease: 'power3.out' }
+        );
+    }
+});
+observer.observe(mobileMenu, { attributes: true, attributeFilter: ['class'] });
 </script>
 </body>
 </html>
