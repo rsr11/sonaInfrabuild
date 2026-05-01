@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sona Infrabuild</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Bebas+Neue&family=Inter:wght@300;400;500&family=Great+Vibes&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            --gold: #C9A96E;
+            --gold-light: #E8D5B0;
+            --dark: #0A0A0A;
+            --cream: #F5F0E8;
+            --warm-gray: #8C8880;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            color: var(--cream);
+            overflow-x: hidden;
+        }
+
+        /* PRELOADER */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: var(--dark);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .preloader-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 8vw, 90px);
+            letter-spacing: 0.2em;
+            color: var(--cream);
+            overflow: hidden;
+        }
+
+        .preloader-text span {
+            display: inline-block;
+            transform: translateY(110%);
+        }
+
+        .preloader-line {
+            width: 0;
+            height: 1px;
+            background: var(--gold);
+            max-width: 200px;
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 28px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            mix-blend-mode: normal;
+        }
+
+        .nav-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(18px, 2.5vw, 24px);
+            letter-spacing: 0.25em;
+            color: white;
+            opacity: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: clamp(20px, 3vw, 48px);
+            list-style: none;
+            opacity: 0;
+        }
+
+        .nav-links a {
+            font-size: 11px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 400;
+        }
+
+        .nav-links a:hover { color: var(--gold); }
+
+        /* HERO */
+        #hero {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* ── MAIN BG SLIDER ── */
+        .hero-bg-track {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .hero-bg-slide {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .hero-bg-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            will-change: transform;
+        }
+
+        /* full-height dark overlay */
+        .hero-bg-slide::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(0,0,0,0.18) 0%,
+                rgba(0,0,0,0.12) 40%,
+                rgba(0,0,0,0.55) 100%
+            );
+        }
+
+        /* ── PREVIEW BOX (bottom-right) ── */
+        #hero-preview {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: clamp(180px, 18vw, 280px);
+            height: clamp(130px, 16vh, 210px);
+            z-index: 20;
+            overflow: hidden;
+            /* thin border-left + border-top to match original */
+            border-left: 1px solid rgba(255,255,255,0.18);
+            border-top: 1px solid rgba(255,255,255,0.18);
+        }
+
+        .preview-slide {
+            position: absolute;
+            inset: 0;
+        }
+
+        .preview-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            will-change: transform;
+        }
+
+        /* Hero Overlaid Text */
+        .hero-content {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: clamp(100px, 12vh, 140px) clamp(24px, 5vw, 64px) clamp(40px, 6vh, 64px);
+        }
+
+        .hero-headline {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(60px, 12vw, 160px);
+            line-height: 0.9;
+            letter-spacing: 0.04em;
+            color: white;
+            overflow: hidden;
+        }
+
+        .hero-headline .line {
+            display: block;
+            overflow: hidden;
+        }
+
+        .hero-headline .line span {
+            display: block;
+            transform: translateY(110%);
+        }
+
+        .hero-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .hero-tagline {
+            max-width: 360px;
+            font-size: clamp(9px, 1.1vw, 11px);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.7);
+            line-height: 2;
+            opacity: 0;
+        }
+
+        /* Slide counter */
+        .slide-counter {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(28px, 4vw, 48px);
+            color: var(--gold-light);
+            opacity: 0;
+            text-align: right;
+            line-height: 1;
+        }
+
+        .slide-counter sup {
+            font-size: 0.5em;
+            vertical-align: super;
+        }
+
+        /* Slide label */
+        .slide-label {
+            position: absolute;
+            bottom: clamp(40px, 6vh, 64px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .slide-label-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(11px, 1.4vw, 14px);
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.55);
+            opacity: 0;
+        }
+
+        /* Scroll cue */
+        .scroll-cue {
+            position: absolute;
+            bottom: clamp(28px, 4vh, 48px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+        }
+
+        .scroll-cue-line {
+            width: 1px;
+            height: 48px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent);
+            animation: scrollLine 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollLine {
+            0% { transform: scaleY(0); transform-origin: top; }
+            50% { transform: scaleY(1); transform-origin: top; }
+            51% { transform: scaleY(1); transform-origin: bottom; }
+            100% { transform: scaleY(0); transform-origin: bottom; }
+        }
+
+        .scroll-cue-text {
+            font-size: 9px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* ABOUT */
+        #about {
+            background: var(--cream);
+            color: var(--dark);
+            padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 96px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-eyebrow {
+            font-size: 10px;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .about-script {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(48px, 9vw, 110px);
+            color: var(--dark);
+            line-height: 1;
+            margin-bottom: clamp(40px, 6vh, 72px);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(32px, 5vw, 80px);
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .about-grid { grid-template-columns: 1fr; }
+            nav { padding: 20px 24px; }
+            .nav-links { display: none; }
+        }
+
+        .about-image-wrap {
+            position: relative;
+        }
+
+        .about-image-wrap img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            display: block;
+        }
+
+        .about-image-accent {
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            width: 60%;
+            aspect-ratio: 4/3;
+            border: 1px solid var(--gold);
+            z-index: -1;
+        }
+
+        .about-text-block {
+            padding-top: clamp(0px, 3vw, 48px);
+        }
+
+        .about-body {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(17px, 2.2vw, 22px);
+            font-style: italic;
+            line-height: 1.9;
+            color: #3A3630;
+            margin-bottom: 40px;
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .stat-cell {
+            background: var(--cream);
+            padding: 24px;
+        }
+
+        .stat-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 5vw, 60px);
+            color: var(--dark);
+            letter-spacing: 0.05em;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--warm-gray);
+            margin-top: 6px;
+        }
+
+        /* BIG QUOTE */
+        .about-quote-stripe {
+            background: var(--dark);
+            color: var(--cream);
+            padding: clamp(48px, 8vh, 80px) clamp(24px, 6vw, 96px);
+            overflow: hidden;
+        }
+
+        .marquee-track {
+            display: flex;
+            white-space: nowrap;
+            animation: marquee 18s linear infinite;
+            gap: 80px;
+        }
+
+        .marquee-track span {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(32px, 5vw, 64px);
+            letter-spacing: 0.15em;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.25);
+        }
+
+        .marquee-track span.filled {
+            -webkit-text-stroke: 0;
+            color: var(--gold);
+        }
+
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        /* PROJECTS */
+        #projects {
+            background: var(--dark);
+            padding: clamp(80px, 12vh, 140px) clamp(24px, 5vw, 80px);
+        }
+
+        .projects-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: clamp(48px, 8vh, 96px);
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .section-eyebrow {
+            font-size: 10px;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(44px, 7vw, 96px);
+            letter-spacing: 0.05em;
+            line-height: 0.95;
+            color: var(--cream);
+        }
+
+        .projects-count {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(60px, 10vw, 120px);
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.12);
+            line-height: 1;
+            align-self: flex-end;
+        }
+
+        /* Project Cards */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2px;
+        }
+
+        .project-card {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .project-card:nth-child(1) { grid-column: span 7; }
+        .project-card:nth-child(2) { grid-column: span 5; }
+        .project-card:nth-child(3) { grid-column: span 5; }
+        .project-card:nth-child(4) { grid-column: span 7; }
+
+        @media (max-width: 768px) {
+            .project-card:nth-child(n) { grid-column: span 12; }
+        }
+
+        .project-card img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            filter: saturate(0.5) brightness(0.75);
+        }
+
+        .project-card:hover img {
+            transform: scale(1.06);
+            filter: saturate(0.85) brightness(0.85);
+        }
+
+        .project-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: clamp(20px, 3vw, 36px);
+        }
+
+        .project-index {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            color: var(--gold);
+            letter-spacing: 0.2em;
+            margin-bottom: 8px;
+        }
+
+        .project-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(22px, 3.5vw, 42px);
+            letter-spacing: 0.08em;
+            color: white;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .project-type {
+            font-size: 10px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .project-arrow {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: all 0.4s ease;
+        }
+
+        .project-card:hover .project-arrow {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .project-arrow svg {
+            width: 14px;
+            height: 14px;
+            stroke: white;
+            fill: none;
+        }
+
+        /* FEATURED PROJECT */
+        .featured-project {
+            margin-top: 80px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .featured-project { grid-template-columns: 1fr; }
+        }
+
+        .featured-image {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .featured-image img {
+            width: 100%;
+            aspect-ratio: 3/2;
+            object-fit: cover;
+            filter: saturate(0.6);
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            background: var(--gold);
+            color: var(--dark);
+            font-size: 9px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            font-weight: 500;
+        }
+
+        .featured-content {
+            background: #111;
+            padding: clamp(40px, 6vw, 80px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .featured-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(38px, 5.5vw, 72px);
+            letter-spacing: 0.06em;
+            line-height: 1;
+            color: var(--cream);
+            margin-bottom: 24px;
+        }
+
+        .featured-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(16px, 1.8vw, 20px);
+            font-style: italic;
+            color: rgba(245,240,232,0.65);
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .featured-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .tag {
+            border: 1px solid rgba(201,169,110,0.4);
+            color: var(--gold);
+            font-size: 9px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            padding: 6px 12px;
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255,255,255,0.25);
+            color: var(--cream);
+            font-size: 10px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            padding: 14px 28px;
+            text-decoration: none;
+            transition: all 0.35s ease;
+            cursor: pointer;
+            background: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-outline:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--dark);
+        }
+
+        /* FOOTER */
+        footer {
+            background: #050505;
+            padding: clamp(48px, 8vh, 96px) clamp(24px, 5vw, 80px) clamp(24px, 4vh, 48px);
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: clamp(32px, 5vw, 80px);
+            margin-bottom: clamp(48px, 7vh, 80px);
+        }
+
+        @media (max-width: 768px) {
+            .footer-top { grid-template-columns: 1fr; }
+        }
+
+        .footer-brand {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(32px, 5vw, 56px);
+            letter-spacing: 0.1em;
+            color: var(--cream);
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+
+        .footer-tagline {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: clamp(15px, 1.6vw, 18px);
+            color: rgba(245,240,232,0.4);
+            line-height: 1.7;
+            max-width: 300px;
+        }
+
+        .footer-col-title {
+            font-size: 9px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(245,240,232,0.5);
+            text-decoration: none;
+            font-size: 13px;
+            letter-spacing: 0.05em;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover { color: var(--gold); }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .footer-copy {
+            font-size: 11px;
+            color: rgba(245,240,232,0.25);
+            letter-spacing: 0.1em;
+        }
+
+        /* REVEAL ANIMATION CLASSES */
+        .reveal-up { opacity: 0; transform: translateY(40px); }
+        .reveal-left { opacity: 0; transform: translateX(-40px); }
+    </style>
+</head>
+<body>
+
+<!-- PRELOADER -->
+<div id="preloader">
+    <div class="preloader-text"><span>SONA</span></div>
+    <div class="preloader-text" style="letter-spacing:0.5em;font-size:clamp(18px,4vw,38px);"><span>INFRABUILD</span></div>
+    <div class="preloader-line"></div>
+</div>
+
+<!-- NAV -->
+<nav id="main-nav">
+    <div class="nav-logo">SONA INFRABUILD</div>
+    <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#">Achievements</a></li>
+        <li><a href="#">Contact</a></li>
+    </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+
+    <!-- ── MAIN BACKGROUND SLIDER ── -->
+    <div class="hero-bg-track">
+        <div class="hero-bg-slide" id="bg-slide-0">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=2000" alt="Exterior architecture">
+        </div>
+        <div class="hero-bg-slide" id="bg-slide-1" style="clip-path:inset(100% 0 0% 0);">
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000" alt="Office interior">
+        </div>
+        <div class="hero-bg-slide" id="bg-slide-2" style="clip-path:inset(100% 0 0% 0);">
+            <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&q=80&w=2000" alt="Luxury finish">
+        </div>
+    </div>
+
+    <!-- ── PREVIEW BOX — bottom right ── -->
+    <div id="hero-preview">
+        <div class="preview-slide" id="prev-slide-0">
+            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=60&w=600" alt="Preview 1">
+        </div>
+        <div class="preview-slide" id="prev-slide-1" style="clip-path:inset(100% 0 0% 0);">
+            <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&q=60&w=600" alt="Preview 2">
+        </div>
+        <div class="preview-slide" id="prev-slide-2" style="clip-path:inset(100% 0 0% 0);">
+            <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=60&w=600" alt="Preview 3">
+        </div>
+    </div>
+
+    <!-- Content overlay -->
+    <div class="hero-content">
+        <div>
+            <div class="hero-headline">
+                <span class="line"><span>SONA</span></span>
+                <span class="line"><span>INFRA</span></span>
+                <span class="line"><span>BUILD</span></span>
+            </div>
+        </div>
+
+        <div class="hero-bottom">
+            <p class="hero-tagline">
+                We take pride in our track record of successfully delivering complex projects — where unwavering commitment to superior finishing and quality sets us apart.
+            </p>
+            <div class="slide-counter">
+                <span id="current-slide">01</span><sup>/03</sup>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll cue -->
+    <div class="scroll-cue" id="scroll-cue">
+        <div class="scroll-cue-line"></div>
+        <span class="scroll-cue-text">Scroll</span>
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+    <p class="about-eyebrow reveal-up">— Established in Bengaluru</p>
+    <h2 class="about-script reveal-up">Our Story</h2>
+
+    <div class="about-grid">
+        <div class="about-image-wrap reveal-left">
+            <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&q=80&w=800" alt="Sona Infrabuild team">
+            <div class="about-image-accent"></div>
+        </div>
+
+        <div class="about-text-block">
+            <p class="about-body reveal-up">
+                Cornerstone lies in its management's technical prowess and the enduring relationships we have cultivated with our clients. The unified top management across all Sona Group subsidiaries ensures seamless operations and enhanced focus on client needs.
+            </p>
+            <p class="about-body reveal-up" style="margin-bottom: 48px;">
+                We have established ourselves as Bengaluru's premier marble and granite trading establishment, serving an extensive portfolio of distinguished clients, including renowned developers and architectural firms.
+            </p>
+
+            <div class="about-stats reveal-up">
+                <div class="stat-cell">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Years of Excellence</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="stat-number">200+</div>
+                    <div class="stat-label">Projects Delivered</div>
+                </div>
+                <div class="stat-cell" style="border-top: 1px solid rgba(0,0,0,0.08);">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Elite Clients</div>
+                </div>
+                <div class="stat-cell" style="border-top: 1px solid rgba(0,0,0,0.08);">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">LEED Certified</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MARQUEE STRIPE -->
+<div class="about-quote-stripe">
+    <div class="marquee-track" aria-hidden="true">
+        <span>QUALITY</span>
+        <span class="filled">✦</span>
+        <span>PRECISION</span>
+        <span class="filled">✦</span>
+        <span>EXCELLENCE</span>
+        <span class="filled">✦</span>
+        <span>CRAFTSMANSHIP</span>
+        <span class="filled">✦</span>
+        <span>QUALITY</span>
+        <span class="filled">✦</span>
+        <span>PRECISION</span>
+        <span class="filled">✦</span>
+        <span>EXCELLENCE</span>
+        <span class="filled">✦</span>
+        <span>CRAFTSMANSHIP</span>
+        <span class="filled">✦</span>
+    </div>
+</div>
+
+<!-- PROJECTS -->
+<section id="projects">
+    <div class="projects-header">
+        <div>
+            <p class="section-eyebrow reveal-up">— Selected Work</p>
+            <h2 class="section-title reveal-up">Our<br>Projects</h2>
+        </div>
+        <div class="projects-count reveal-up">12</div>
+    </div>
+
+    <div class="projects-grid">
+        <div class="project-card">
+            <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&q=80&w=900" alt="Godrej Indranagar">
+            <div class="project-card-overlay">
+                <span class="project-index">01</span>
+                <h3 class="project-name">Godrej Indranagar</h3>
+                <p class="project-type">Grade A Office — LEED Platinum</p>
+            </div>
+            <div class="project-arrow">
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg>
+            </div>
+        </div>
+
+        <div class="project-card">
+            <img src="https://images.unsplash.com/photo-1600573472592-401b489a3cdc?auto=format&fit=crop&q=80&w=700" alt="Marble & Granite Project">
+            <div class="project-card-overlay">
+                <span class="project-index">02</span>
+                <h3 class="project-name">The Stone House</h3>
+                <p class="project-type">Residential — Luxury Finish</p>
+            </div>
+            <div class="project-arrow">
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg>
+            </div>
+        </div>
+
+        <div class="project-card">
+            <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=700" alt="Interior project">
+            <div class="project-card-overlay">
+                <span class="project-index">03</span>
+                <h3 class="project-name">Prestige Skyline</h3>
+                <p class="project-type">Commercial — Common Area</p>
+            </div>
+            <div class="project-arrow">
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg>
+            </div>
+        </div>
+
+        <div class="project-card">
+            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=900" alt="Luxury apartment">
+            <div class="project-card-overlay">
+                <span class="project-index">04</span>
+                <h3 class="project-name">Brigade Horizon</h3>
+                <p class="project-type">Residential Towers — Premium</p>
+            </div>
+            <div class="project-arrow">
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Project -->
+    <div class="featured-project">
+        <div class="featured-image">
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000" alt="Godrej Indranagar featured">
+            <div class="featured-badge">Flagship Project</div>
+        </div>
+        <div class="featured-content">
+            <p class="section-eyebrow">— Featured Work</p>
+            <h3 class="featured-title">Godrej &<br>SOM Tower</h3>
+            <p class="featured-desc">
+                Working hand-in-hand with Godrej and SOM, we brought to life the Common Area Finishes of this USGBC Platinum LEED certified Grade A office tower — a benchmark in sustainable luxury.
+            </p>
+            <div class="featured-tags">
+                <span class="tag">LEED Platinum</span>
+                <span class="tag">Grade A Office</span>
+                <span class="tag">Common Area Finishes</span>
+                <span class="tag">Bengaluru</span>
+            </div>
+            <button class="btn-outline">
+                View Case Study
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-top">
+        <div>
+            <div class="footer-brand">SONA<br>INFRABUILD</div>
+            <p class="footer-tagline">Bengaluru's premier marble and granite establishment — where craftsmanship meets architecture.</p>
+        </div>
+        <div>
+            <p class="footer-col-title">Navigation</p>
+            <ul class="footer-links">
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#">Achievements</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+        <div>
+            <p class="footer-col-title">Contact</p>
+            <ul class="footer-links">
+                <li><a href="#">Bengaluru, Karnataka</a></li>
+                <li><a href="#">info@sonainfrabuild.com</a></li>
+                <li><a href="#">+91 80 XXXX XXXX</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span class="footer-copy">© 2025 Sona Infrabuild Pvt. Ltd. All rights reserved.</span>
+        <span class="footer-copy">Crafted with precision</span>
+    </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ─── PRELOADER ─────────────────────────────────────────────────────────────────
+const tl = gsap.timeline({
+    onComplete: () => {
+        document.getElementById('preloader').style.pointerEvents = 'none';
+        initHeroAnimations();
+    }
+});
+
+tl.to('.preloader-text span', {
+    y: 0,
+    duration: 1,
+    stagger: 0.15,
+    ease: 'power4.out'
+})
+.to('.preloader-line', {
+    width: 200,
+    duration: 0.8,
+    ease: 'power3.inOut'
+}, '-=0.3')
+.to('#preloader', {
+    clipPath: 'inset(0 0 100% 0)',
+    duration: 1,
+    delay: 0.4,
+    ease: 'power4.inOut'
+})
+.set('#preloader', { display: 'none' });
+
+// ─── HERO ANIMATIONS (run after preloader) ─────────────────────────────────────
+function initHeroAnimations() {
+    const heroTL = gsap.timeline();
+
+    heroTL
+        .to('.hero-headline .line span', {
+            y: 0,
+            duration: 1.2,
+            stagger: 0.1,
+            ease: 'power4.out'
+        })
+        .to(['.hero-tagline', '.slide-counter'], {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: 'power3.out'
+        }, '-=0.5')
+        .to(['.nav-logo', '.nav-links'], {
+            opacity: 1,
+            duration: 0.6,
+            ease: 'power2.out'
+        }, '-=0.5')
+        .to('#scroll-cue', {
+            opacity: 1,
+            duration: 0.6,
+            ease: 'power2.out'
+        }, '-=0.3');
+}
+
+// ─── HERO SLIDER ────────────────────────────────────────────────────────────────
+// Two independent tracks: bgSlides (full bg) + prevSlides (bottom-right box)
+// Both wipe bottom-to-top in sync every 3 s.
+
+const bgSlides   = Array.from(document.querySelectorAll('.hero-bg-slide'));
+const prevSlides = Array.from(document.querySelectorAll('.preview-slide'));
+const counterEl  = document.getElementById('current-slide');
+const TOTAL      = bgSlides.length;   // 3
+let current      = 0;
+let animating    = false;
+
+function wipeIn(el, onDone) {
+    gsap.fromTo(el,
+        { clipPath: 'inset(100% 0 0% 0)' },
+        { clipPath: 'inset(0% 0 0% 0)', duration: 1.3, ease: 'power4.inOut', onComplete: onDone }
+    );
+}
+
+function hideOld(el) {
+    // park it behind — instant
+    gsap.set(el, { clipPath: 'inset(0 0 100% 0)' });
+}
+
+function kenBurns(el) {
+    const img = el.querySelector('img');
+    if (img) gsap.fromTo(img, { scale: 1.1 }, { scale: 1.03, duration: 4, ease: 'power2.out' });
+}
+
+function advance() {
+    if (animating) return;
+    animating = true;
+
+    const next = (current + 1) % TOTAL;
+    const nextIdx = (next + 1).toString().padStart(2, '0');
+
+    // Counter flip
+    gsap.to(counterEl, { y: -18, opacity: 0, duration: 0.25,
+        onComplete: () => {
+            counterEl.textContent = nextIdx;
+            gsap.fromTo(counterEl, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: 'power2.out' });
+        }
+    });
+
+    // Wipe BG slide in
+    wipeIn(bgSlides[next], () => {
+        hideOld(bgSlides[current]);
+        current   = next;
+        animating = false;
+    });
+    kenBurns(bgSlides[next]);
+
+    // Wipe preview slide in (same moment, independent element)
+    wipeIn(prevSlides[next], () => {
+        hideOld(prevSlides[(next - 1 + TOTAL) % TOTAL]);
+    });
+    kenBurns(prevSlides[next]);
+}
+
+// Ken-burns on initial slides
+kenBurns(bgSlides[0]);
+kenBurns(prevSlides[0]);
+
+setInterval(advance, 3000);
+
+// ─── SCROLL REVEAL ─────────────────────────────────────────────────────────────
+gsap.utils.toArray('.reveal-up').forEach(el => {
+    gsap.to(el, {
+        opacity: 1,
+        y: 0,
+        duration: 0.9,
+        ease: 'power3.out',
+        scrollTrigger: {
+            trigger: el,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+        }
+    });
+});
+
+gsap.utils.toArray('.reveal-left').forEach(el => {
+    gsap.to(el, {
+        opacity: 1,
+        x: 0,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: {
+            trigger: el,
+            start: 'top 80%',
+            toggleActions: 'play none none none'
+        }
+    });
+});
+
+// ─── PROJECT CARDS STAGGER ─────────────────────────────────────────────────────
+gsap.from('.project-card', {
+    opacity: 0,
+    y: 48,
+    stagger: 0.12,
+    duration: 0.9,
+    ease: 'power3.out',
+    scrollTrigger: {
+        trigger: '.projects-grid',
+        start: 'top 80%',
+    }
+});
+
+gsap.from('.featured-project', {
+    opacity: 0,
+    y: 60,
+    duration: 1,
+    ease: 'power3.out',
+    scrollTrigger: {
+        trigger: '.featured-project',
+        start: 'top 80%'
+    }
+});
+
+// ─── NAV BG ON SCROLL ──────────────────────────────────────────────────────────
+ScrollTrigger.create({
+    start: '80px top',
+    onEnter: () => {
+        gsap.to('#main-nav', {
+            background: 'rgba(10,10,10,0.85)',
+            backdropFilter: 'blur(16px)',
+            padding: '16px 48px',
+            duration: 0.4
+        });
+    },
+    onLeaveBack: () => {
+        gsap.to('#main-nav', {
+            background: 'transparent',
+            backdropFilter: 'blur(0px)',
+            padding: '28px 48px',
+            duration: 0.4
+        });
+    }
+});
+</script>
+</body>
+</html>
